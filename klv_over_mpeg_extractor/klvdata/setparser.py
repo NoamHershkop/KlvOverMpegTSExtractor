@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-
+from logging import getLogger
 # The MIT License (MIT)
 #
 # Copyright (c) 2017 Matthew Pare (paretech@gmail.com)
@@ -30,6 +30,9 @@ from collections import OrderedDict
 from klv_over_mpeg_extractor.klvdata.element import Element
 from klv_over_mpeg_extractor.klvdata.element import UnknownElement
 from klv_over_mpeg_extractor.klvdata.klvparser import KLVParser
+
+
+logger = getLogger("__name__")
 
 
 class SetParser(Element, metaclass=ABCMeta):
@@ -120,11 +123,11 @@ class SetParser(Element, metaclass=ABCMeta):
         return f'{str(type(item))}: {item.value}'
 
     def structure(self):
-        print(self.custom_repr(self))
+        logger.debug(self.custom_repr(self))
 
         def repeat(items, indent=1):
             for item in items:
-                print(indent * "\t" + self.custom_repr(item))
+                logger.debug(indent * "\t" + self.custom_repr(item))
                 if hasattr(item, 'items'):
                     repeat(item.items.values(), indent+1)
 
@@ -143,9 +146,9 @@ class SetParser(Element, metaclass=ABCMeta):
             crc_value = str(self.items[b'\x01'].value)
 
             is_valid = crc_value == bcc_value
-            print(f'Is valid: {is_valid}, Calculated CRC: {bcc_value}, CRC value: {crc_value}')
+            logger.debug(f'Is valid: {is_valid}, Calculated CRC: {bcc_value}, CRC value: {crc_value}')
         except Exception as e:
-            print(f'Cannot validate: {e}')
+            logger.error(f'Cannot validate: {e}')
 
 
 def str_dict(values):

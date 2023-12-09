@@ -1,6 +1,11 @@
+from logging import getLogger
+
 from .adaptaionfield import *
 from .pes import *
 from .utils import *
+
+
+logger = getLogger("__name__")
 
 
 def extract_packet(data):
@@ -28,7 +33,7 @@ def extract_packet(data):
         packet['payload_index'] = 5 + packet['adaptation_field']['field_length']
 
     if packet['payload_index'] > len(data):
-        print(f'Packet has payload start bigger then length: {packet["payload_index"]} >= {len(data)}')
+        logger.warning(f'Packet has payload start bigger then length: {packet["payload_index"]} >= {len(data)}')
 
     packet['payload'] = data[packet['payload_index']:]
     packet['pes'] = extract_pes(packet['payload'])
