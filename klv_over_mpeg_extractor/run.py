@@ -4,20 +4,23 @@ import click
 from klv_over_mpeg_extractor import mpegtsdata, klvdata
 from klv_over_mpeg_extractor.klvreconstructor import reconstruct_klv_packets
 
-
 logger = getLogger("__name__")
 
 
-def extract_klv(path):
+def extract_klv_file(path):
     with open(path, 'rb') as stream:
         for packet in klvdata.StreamParser(stream):
             packet.structure()
             packet.validate()
 
 
-def extract_mpegts(path):
-    with open(path, 'rb') as stream:
-        streams_packets = mpegtsdata.extract_streams(stream)
+def extract_mpegts_from_file(file: str):
+    with open(file, 'rb') as stream:
+        extract_mpegts(stream)
+
+
+def extract_mpegts(stream):
+    streams_packets = mpegtsdata.extract_streams_for_file(stream)
     for key in streams_packets:
         packets = streams_packets[key]
         logger.debug(f'key=0x{key:X}, packets: {len(packets)}')
@@ -35,9 +38,15 @@ def extract_mpegts(path):
 
 @click.command()
 @click.option("--file", "-f", help="File stream to extract", type=str)
+@click.option("--address", "-a", help="Address of MPEG TS", type=str)
+@click.option("--port", "-p", help="port of MPEG TS", type=str)
 @click.option("--klv", "-k", help='Is file KLV (true) or MPEG-TS (false)', is_flag=True)
-def klv_extractor(file: str, klv: bool):
+def klv_extractor(file: str, address: str, klv: bool):
     if klv:
-        extract_klv(file)
+        extract_klv_file(file)
+    elif file:
+        extract_mpegts_from_file(file)
+    elif address:
+        ...
     else:
-        extract_mpegts(file)
+        logger.error("No method was given")
